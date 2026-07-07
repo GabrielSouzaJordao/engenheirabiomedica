@@ -5,6 +5,7 @@
   'use strict';
 
   var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var isFinePointer = window.matchMedia('(pointer: fine)').matches;
 
   function initReveal() {
     var targets = document.querySelectorAll(
@@ -41,11 +42,6 @@
       targets.forEach(function (el) { el.classList.add('is-visible'); });
       var wa = document.querySelector('.whatsapp-float');
       if (wa) wa.style.opacity = '1';
-      var banner = document.querySelector('.brand-hero__image');
-      if (banner) {
-        banner.style.opacity = '1';
-        banner.style.transform = 'none';
-      }
       return;
     }
 
@@ -61,9 +57,57 @@
     targets.forEach(function (el) { observer.observe(el); });
   }
 
+  function initHeroParallax() {
+    if (prefersReducedMotion || !isFinePointer) return;
+
+    var hero = document.querySelector('.brand-hero');
+    var texture = document.querySelector('.brand-hero__texture');
+    var glow = document.querySelector('.brand-hero__glow');
+    if (!hero || !texture) return;
+
+    var ticking = false;
+
+    hero.addEventListener('mousemove', function (e) {
+      if (ticking) return;
+      ticking = true;
+
+      requestAnimationFrame(function () {
+        var rect = hero.getBoundingClientRect();
+        var x = (e.clientX - rect.left) / rect.width - 0.5;
+        var y = (e.clientY - rect.top) / rect.height - 0.5;
+
+        texture.style.transform = 'translate(' + (x * 6) + 'px, ' + (y * 4) + 'px)';
+        if (glow) {
+          glow.style.transform = 'translate(' + (x * -8) + 'px, ' + (y * -5) + 'px)';
+        }
+        ticking = false;
+      });
+    });
+
+    hero.addEventListener('mouseleave', function () {
+      texture.style.transform = '';
+      if (glow) glow.style.transform = '';
+    });
+  }
+
+  function initIconHover() {
+    if (prefersReducedMotion) return;
+
+    document.querySelectorAll('.brand-services__item').forEach(function (item) {
+      item.addEventListener('mouseenter', function () {
+        item.classList.add('is-hovered');
+      });
+      item.addEventListener('mouseleave', function () {
+        item.classList.remove('is-hovered');
+      });
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     document.body.classList.add('is-loaded');
     initReveal();
+    initHeroParallax();
+    initIconHover();
   });
 
 })();
