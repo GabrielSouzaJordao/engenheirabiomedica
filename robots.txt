@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sgmsconsultoria.com.br/sitemap.xml
